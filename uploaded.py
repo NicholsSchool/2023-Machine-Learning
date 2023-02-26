@@ -15,7 +15,7 @@ from pycoral.adapters import common
 from pycoral.adapters import classify
 
 # the TFLite converted to be used with edgetpu
-modelPath = "Models/detect.tflite"
+modelPath = "Models/detect_edgetpu.tflite"
 # The path to labels.txt that was downloaded with your model
 labelPath = "Models/labelmap.pbtxt"
 
@@ -121,8 +121,9 @@ def main():
         classes = interpreter.get_tensor(output_details[classes_idx]['index'])[0] # Class index of detected objects
         scores = interpreter.get_tensor(output_details[scores_idx]['index'])[0] # Confidence of detected objects
 
-        imH = width
-        imW = height
+        imH = 120
+        imW = 160
+
 
         for i in range(len(scores)):
             if ((scores[i] > min_conf_threshold) and (scores[i] <= 1.0)):
