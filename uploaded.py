@@ -14,6 +14,20 @@ from pycoral.utils.edgetpu import make_interpreter
 from pycoral.adapters import common
 from pycoral.adapters import classify
 
+print("Connecting to Network Tables")
+inst = ntcore.NetworkTableInstance.getDefault()
+table = inst.getTable("pieces")
+
+piece = table.getStringTopic("piece").publish()
+xMin = table.getIntegerTopic("xMin").publish()
+yMin = table.getIntegerTopic("yMin").publish()
+xMax = table.getIntegerTopic("xMax").publish()
+yMax = table.getIntegerTopic("yMax").publish()
+
+inst.startClient4("example client")
+inst.setServerTeam(4930)
+inst.startDSClient()
+
 # the TFLite converted to be used with edgetpu
 modelPath = "Models/detect_edgetpu.tflite"
 # The path to labels.txt that was downloaded with your model
@@ -139,12 +153,19 @@ def main():
 
                 # Draw label
                 object_name = labels[int(classes[i])] # Look up object name from "labels" array using class index
+                
 
                 print('piece: ' + str( object_name ) )
                 print('ymin: ' + str( ymin ))
                 print('xmin: ' + str(xmin))
                 print('ymax: ' + str(ymax))
                 print('xmax: ' + str(xmax))
+
+                piece.set(object_name)
+                xMin.set(xmin)
+                yMin.set(ymin)
+                xMax.set(xmax)
+                yMax.set(ymax)
     
 
 
