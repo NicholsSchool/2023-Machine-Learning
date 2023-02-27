@@ -1,5 +1,5 @@
 from cscore import CameraServer
-from ntcore import NetworkTableInstance
+from ntcore import NetworkTableInstance, EventFlags
 
 import cv2
 import json
@@ -14,19 +14,19 @@ from pycoral.utils.edgetpu import make_interpreter
 from pycoral.adapters import common
 from pycoral.adapters import classify
 
-print("Connecting to Network Tables")
-inst = ntcore.NetworkTableInstance.getDefault()
-table = inst.getTable("pieces")
+#print("Connecting to Network Tables")
+#inst = ntcore.NetworkTableInstance.getDefault()
+#table = inst.getTable("pieces")
 
-piece = table.getStringTopic("piece").publish()
-xMin = table.getIntegerTopic("xMin").publish()
-yMin = table.getIntegerTopic("yMin").publish()
-xMax = table.getIntegerTopic("xMax").publish()
-yMax = table.getIntegerTopic("yMax").publish()
+#piece = table.getStringTopic("piece").publish()
+#xMin = table.getIntegerTopic("xMin").publish()
+#yMin = table.getIntegerTopic("yMin").publish()
+#xMax = table.getIntegerTopic("xMax").publish()
+#yMax = table.getIntegerTopic("yMax").publish()
 
-inst.startClient4("example client")
-inst.setServerTeam(4930)
-inst.startDSClient()
+#inst.startClient4("example client")
+#inst.setServerTeam(4930)
+#inst.startDSClient()
 
 # the TFLite converted to be used with edgetpu
 modelPath = "Models/detect_edgetpu.tflite"
@@ -71,11 +71,19 @@ def main():
         ntinst.startServer()
     else:
         print("Setting up NetworkTables client for team {}".format(team))
+        table = ntinst.getTable('Vision')
+
+        #piece = table.getStringTopic("piece").publish()
+        xMin = table.getIntegerTopic("xMin").publish()
+        yMin = table.getIntegerTopic("yMin").publish()
+        xMax = table.getIntegerTopic("xMax").publish()
+        yMax = table.getIntegerTopic("yMax").publish()
+
         ntinst.startClient4("wpilibpi")
-        #ntinst.setServerTeam(team)
+        ntinst.setServerTeam(team)
         ntinst.startDSClient()
     #vision_nt = NetworkTables.getTable('Vision')
-    vision_nt = ntinst.getTable('Vision')
+    
 
     # Load your model onto the TF Lite Interpreter
     interpreter = make_interpreter(modelPath)
@@ -161,11 +169,12 @@ def main():
                 print('ymax: ' + str(ymax))
                 print('xmax: ' + str(xmax))
 
-                piece.set(object_name)
+                #piece.set(object_name)
                 xMin.set(xmin)
                 yMin.set(ymin)
                 xMax.set(xmax)
                 yMax.set(ymax)
+    
     
 
 
