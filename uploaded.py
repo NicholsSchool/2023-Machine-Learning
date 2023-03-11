@@ -14,47 +14,30 @@ from pycoral.utils.edgetpu import make_interpreter
 from pycoral.adapters import common
 from pycoral.adapters import classify
 
-#print("Connecting to Network Tables")
-#inst = ntcore.NetworkTableInstance.getDefault()
-#table = inst.getTable("pieces")
-
-#piece = table.getStringTopic("piece").publish()
-#xMin = table.getIntegerTopic("xMin").publish()
-#yMin = table.getIntegerTopic("yMin").publish()
-#xMax = table.getIntegerTopic("xMax").publish()
-#yMax = table.getIntegerTopic("yMax").publish()
-
-#inst.startClient4("example client")
-#inst.setServerTeam(4930)
-#inst.startDSClient()
 
 # the TFLite converted to be used with edgetpu
 modelPath = "Models/detect_edgetpu.tflite"
 # The path to labels.txt that was downloaded with your model
-labelPath = "Models/labelmap.pbtxt"
+labelPath = "labelmap.txt"
 
-min_conf_threshold = 0.5
+with open(labelPath, 'r') as f:
+    labels = [line.strip() for line in f.readlines()]
+
+min_conf_threshold = 0.9
 
 team = 4930
 server = False
-
-# This function takes in a TFLite Interpter and Image, and returns classifications
-def classifyImage(interpreter, image):
-    size = common.input_size(interpreter)
-    common.set_input(interpreter, cv2.resize(image, size, fx=0, fy=0,
-                                             interpolation=cv2.INTER_CUBIC))
-    interpreter.invoke()
-
-    return classify.get_classes(interpreter)
-
 
 def main():
     with open('/boot/frc.json') as f:
         config = json.load(f)
     camera = config['cameras'][0]
 
+    fps = camera['fps']
     width = camera['width']
     height = camera['height']
+
+    print(fps)
 
 
     CameraServer.startAutomaticCapture()
@@ -86,6 +69,8 @@ def main():
     
 
     # Load your model onto the TF Lite Interpreter
+    #delegate = load_edgetpu_delegate()
+
     interpreter = make_interpreter(modelPath)
     interpreter.allocate_tensors()
     labels = read_label_file(labelPath)
