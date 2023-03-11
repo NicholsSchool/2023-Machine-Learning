@@ -16,9 +16,9 @@ from pycoral.adapters import classify
 
 
 # the TFLite converted to be used with edgetpu
-modelPath = "Models/detect_edgetpu.tflite"
+modelPath = "Models_v1/detect_edgetpu.tflite"
 # The path to labels.txt that was downloaded with your model
-labelPath = "labelmap.txt"
+labelPath = "Models_v1/labelmap.txt"
 
 with open(labelPath, 'r') as f:
     labels = [line.strip() for line in f.readlines()]
@@ -54,9 +54,13 @@ def main():
         ntinst.startServer()
     else:
         print("Setting up NetworkTables client for team {}".format(team))
-        table = ntinst.getTable('Vision')
 
-        #piece = table.getStringTopic("piece").publish()
+        table = ntinst.getTable('Vision')
+        table2 = ntinst.getTable( 'Piece' )
+
+        piece = table2.getStringTopic("Piece").publish()
+
+        piece = table2.getStringTopic("piece").publish()
         xMin = table.getIntegerTopic("xMin").publish()
         yMin = table.getIntegerTopic("yMin").publish()
         xMax = table.getIntegerTopic("xMax").publish()
@@ -155,6 +159,7 @@ def main():
                 print('xmax: ' + str(xmax))
 
                 #piece.set(object_name)
+                piece.set(object_name)
                 xMin.set(xmin)
                 yMin.set(ymin)
                 xMax.set(xmax)
