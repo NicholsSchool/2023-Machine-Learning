@@ -14,6 +14,15 @@ from pycoral.utils.edgetpu import make_interpreter
 from pycoral.adapters import common
 from pycoral.adapters import classify
 
+WIDTH = 160
+HEIGHT = 120
+
+D_FOV = 1.20
+H_FOV = 1.05
+V_FOV = 0.59
+
+H_RADIANS_PER_PIXEL = H_FOV / WIDTH
+
 
 # the TFLite converted to be used with edgetpu
 modelPath = "Models_v1/detect_edgetpu.tflite"
@@ -23,7 +32,7 @@ labelPath = "Models_v1/labelmap.txt"
 with open(labelPath, 'r') as f:
     labels = [line.strip() for line in f.readlines()]
 
-min_conf_threshold = 0.9
+min_conf_threshold = 0.70
 
 team = 4930
 server = False
@@ -37,7 +46,8 @@ def main():
     width = camera['width']
     height = camera['height']
 
-    print(fps)
+    print(width)
+    print(height)
 
 
     CameraServer.startAutomaticCapture()
@@ -58,9 +68,11 @@ def main():
         table = ntinst.getTable('Vision')
         table2 = ntinst.getTable( 'Piece' )
 
-        piece = table2.getStringTopic("Piece").publish()
-
         piece = table2.getStringTopic("piece").publish()
+
+        distance = table.getDoubleTopic("Distance").publish()
+        a = table.getDoubleTopic("Angle").publish()
+
         xMin = table.getIntegerTopic("xMin").publish()
         yMin = table.getIntegerTopic("yMin").publish()
         xMax = table.getIntegerTopic("xMax").publish()
@@ -138,6 +150,10 @@ def main():
 
         for i in range(len(scores)):
             if ((scores[i] > min_conf_threshold) and (scores[i] <= 1.0)):
+                
+                f = 160
+                dist = 0
+                d = 0
 
                 # Get bounding box coordinates and draw box
                 # Interpreter can return coordinates that are outside of image dimensions, need to force them to be within image using max() and min()
@@ -145,14 +161,36 @@ def main():
                 xmin = int(max(1,(boxes[i][1] * imW)))
                 ymax = int(min(imH,(boxes[i][2] * imH)))
                 xmax = int(min(imW,(boxes[i][3] * imW)))
+    
                 
                 cv2.rectangle(output_img, (xmin,ymin), (xmax,ymax), (10, 255, 0), 2)
 
                 # Draw label
                 object_name = labels[int(classes[i])] # Look up object name from "labels" array using class index
                 
+                if( object_name == 'Cone' ):
+                    if( (ymax - ymin) < ( xmax - xmin) ):
+                        dist = ymax - ymin
+                        d = ( 21 * f ) / (dist)
+                        print('Knocked Over')
+                    else:
+                        dist = xmax - xmin
+                        d = ( 21 * f ) / (dist)
+                        print('Upright')
+                else:
+                    dist = xmax - xmin
+                    d = ( 21 * f ) / (dist)
+                    print('Cube')
 
-                print('piece: ' + str( object_name ) )
+                angle = H_RADIANS_PER_PIXEL * ( ( (xmax + xmin) / 2 ) - ( WIDTH / 2 ) )
+
+
+                #f = ( ( xmax - xmin) * 100 ) / 21
+
+                print( 'f: ' + str( f ) )
+                print('piece: ' + str(object_name) )
+                print('distance: ' + str(d))
+                print('angle: ' + str(angle))
                 print('ymin: ' + str( ymin ))
                 print('xmin: ' + str(xmin))
                 print('ymax: ' + str(ymax))
@@ -160,6 +198,8 @@ def main():
 
                 #piece.set(object_name)
                 piece.set(object_name)
+                distance.set(d)
+                a.set(angle)
                 xMin.set(xmin)
                 yMin.set(ymin)
                 xMax.set(xmax)
