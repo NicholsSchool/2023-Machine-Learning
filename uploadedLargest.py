@@ -152,6 +152,9 @@ def main():
         imW = 160
 
 
+        index = -1
+        largestWidth = 0; 
+
         for i in range(len(scores)):
             if ((scores[i] > min_conf_threshold) and (scores[i] <= 1.0)):
                 
@@ -159,12 +162,20 @@ def main():
                 dist = 0
                 d = 0
 
+                
+
                 # Get bounding box coordinates and draw box
                 # Interpreter can return coordinates that are outside of image dimensions, need to force them to be within image using max() and min()
                 ymin = int(max(1,(boxes[i][0] * imH)))
                 xmin = int(max(1,(boxes[i][1] * imW)))
                 ymax = int(min(imH,(boxes[i][2] * imH)))
                 xmax = int(min(imW,(boxes[i][3] * imW)))
+
+                width = xmax - xmin
+
+                if( width > largestWidth ):
+                    index = i
+                    largestWidth = width
     
                 
                 cv2.rectangle(output_img, (xmin,ymin), (xmax,ymax), (10, 255, 0), 2)
@@ -213,11 +224,19 @@ def main():
                 a.set(angle)
                 X_dist.set(X)
                 Y_dist.set(Y)
-                xMin.set(xmin)
-                yMin.set(ymin)
-                xMax.set(xmax)
-                yMax.set(ymax)
-    
+
+
+
+        if( index != -1 ):
+            ymin = int(max(1,(boxes[index][0] * imH)))
+            xmin = int(max(1,(boxes[index][1] * imW)))
+            ymax = int(min(imH,(boxes[index][2] * imH)))
+            xmax = int(min(imW,(boxes[index][3] * imW)))
+
+            xMin.set(xmin)
+            yMin.set(ymin)
+            xMax.set(xmax)
+            yMax.set(ymax)
     
 
 
