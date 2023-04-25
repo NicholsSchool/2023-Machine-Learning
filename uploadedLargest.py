@@ -144,9 +144,15 @@ def main():
         interpreter.invoke()
 
         # Retrieve detection results
-        boxes = interpreter.get_tensor(output_details[boxes_idx]['index'])[0] # Bounding box coordinates of detected objects
-        classes = interpreter.get_tensor(output_details[classes_idx]['index'])[0] # Class index of detected objects
-        scores = interpreter.get_tensor(output_details[scores_idx]['index'])[0] # Confidence of detected objects
+        boxes = 
+interpreter.get_tensor(output_details[boxes_idx]['index'])[0] # Bounding 
+box coordinates of detected objects
+        classes = 
+interpreter.get_tensor(output_details[classes_idx]['index'])[0] # Class 
+index of detected objects
+        scores = 
+interpreter.get_tensor(output_details[scores_idx]['index'])[0] # 
+Confidence of detected objects
 
         imH = 120
         imW = 160
@@ -165,7 +171,9 @@ def main():
                 
 
                 # Get bounding box coordinates and draw box
-                # Interpreter can return coordinates that are outside of image dimensions, need to force them to be within image using max() and min()
+                # Interpreter can return coordinates that are outside of 
+image dimensions, need to force them to be within image using max() and 
+min()
                 ymin = int(max(1,(boxes[i][0] * imH)))
                 xmin = int(max(1,(boxes[i][1] * imW)))
                 ymax = int(min(imH,(boxes[i][2] * imH)))
@@ -178,10 +186,12 @@ def main():
                     largestWidth = width
     
                 
-                cv2.rectangle(output_img, (xmin,ymin), (xmax,ymax), (10, 255, 0), 2)
+                cv2.rectangle(output_img, (xmin,ymin), (xmax,ymax), (10, 
+255, 0), 2)
 
                 # Draw label
-                object_name = labels[int(classes[i])] # Look up object name from "labels" array using class index
+                object_name = labels[int(classes[i])] # Look up object 
+name from "labels" array using class index
                 
                 if( object_name == 'Cone' ):
                     if( (ymax - ymin) < ( xmax - xmin) ):
@@ -197,7 +207,8 @@ def main():
                     d = ( 21 * f ) / (dist)
                     print('Cube')
 
-                angle = H_RADIANS_PER_PIXEL * ( ( (xmax + xmin) / 2 ) - ( WIDTH / 2 ) )
+                angle = H_RADIANS_PER_PIXEL * ( ( (xmax + xmin) / 2 ) - ( 
+WIDTH / 2 ) )
 
                 X = math.cos( angle ) * d
                 Y = -math.sin( angle ) * d
@@ -246,7 +257,8 @@ def main():
         prev_time = start_time
 
         fps = 1 / processing_time
-        cv2.putText(output_img, str(round(fps, 1)), (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
+        cv2.putText(output_img, str(round(fps, 1)), (0, 40), 
+cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
         output_stream.putFrame(output_img)
 
 main()

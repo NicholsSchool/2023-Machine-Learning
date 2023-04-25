@@ -151,6 +151,8 @@ def main():
         imH = 120
         imW = 160
 
+        largestWidth = 0
+        cubeIndex = -1 
 
         for i in range(len(scores)):
             if ((scores[i] > min_conf_threshold) and (scores[i] <= 1.0)):
@@ -165,6 +167,13 @@ def main():
                 xmin = int(max(1,(boxes[i][1] * imW)))
                 ymax = int(min(imH,(boxes[i][2] * imH)))
                 xmax = int(min(imW,(boxes[i][3] * imW)))
+
+                cubeWidth = xmax - xmin
+
+                if( cubeWidth > largestWidth ):
+                    largestWidth = cubeWidth
+                    cubeIndex = i
+
     
                 
                 cv2.rectangle(output_img, (xmin,ymin), (xmax,ymax), (10, 255, 0), 2)
@@ -213,15 +222,26 @@ def main():
                 a.set(angle)
                 X_dist.set(X)
                 Y_dist.set(Y)
-                xMin.set(xmin)
-                yMin.set(ymin)
-                xMax.set(xmax)
-                yMax.set(ymax)
+                
     
     
 
 
         # Draw framerate in corner of frame
+
+        if( cubeIndex != -1 ):
+            ymin = int(max(1,(boxes[cubeIndex][0] * imH)))
+            xmin = int(max(1,(boxes[cubeIndex][1] * imW)))
+            ymax = int(min(imH,(boxes[cubeIndex][2] * imH)))
+            xmax = int(min(imW,(boxes[cubeIndex][3] * imW)))
+
+            xMin.set(xmin)
+            yMin.set(ymin)
+            xMax.set(xmax)
+            yMax.set(ymax)
+
+            cv2.rectangle(output_img, (xmin,ymin), (xmax,ymax), (0, 0, 255), 2)
+
 
         processing_time = start_time - prev_time
         prev_time = start_time
